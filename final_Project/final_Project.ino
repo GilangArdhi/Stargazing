@@ -30,9 +30,11 @@
  *************************************************************/
 
 /* Comment this out to disable prints and save space */
+//mendeklarasikan/mendefisinikan port virtual yang ada di blynk
 #define BLYNK_PRINT Serial
 
 /* Fill-in your Template ID (only if using Blynk.Cloud) */
+//identitas dari projek yang dibuat pada blynk
 #define BLYNK_TEMPLATE_ID "TMPLD-x2K3nA"
 #define BLYNK_DEVICE_NAME "Smarth Infus"
 #define BLYNK_AUTH_TOKEN "1CDN6IV4LgL3F3YuD5kWe2df0ogkvUU0"
@@ -40,10 +42,11 @@
 //library yang digunakan untuk menyambung ke wifi
 #include <WiFi.h>
 #include <WiFiClient.h>
+
 //library yang digunakan agar esp32 dapat tersambung dengan blynk
 #include <BlynkSimpleEsp32.h>
-//library sensor berat hx711
 
+//library sensor berat hx711
 #include "HX711.h"
 
 //deklarasi untuk pin DOUT dan CLK pada sensor berat
