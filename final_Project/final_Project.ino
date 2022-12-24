@@ -60,6 +60,8 @@ float calibration_factor = 1100.0;
 //deklarasi gram yang akan digunakan sebagai
 //variable yang menampung nilai berat
 float GRAM;
+//variable untuk menampung nilai maximal berat
+float maxGRAM = 0;
 
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
@@ -83,10 +85,15 @@ void myTimerEvent(){
   GRAM = scale.get_units(), 10;
   Blynk.virtualWrite(V0, GRAM);
   delay(100);
-  if (GRAM < (1000/6)){
+  if (maxGRAM < GRAM){
+    maxGRAM = GRAM;
+  } else if (GRAM < 1.0){
+    maxGRAM = 0;
+  }
+  if (GRAM < (maxGRAM/6)){
     Blynk.virtualWrite(V1, HIGH);
     Blynk.virtualWrite(V2, LOW);
-  } else if (GRAM > (1000/6) && GRAM < (1000/3)){
+  } else if (GRAM > (maxGRAM/6) && GRAM < (maxGRAM/3)){
     Blynk.virtualWrite(V2, HIGH);
     Blynk.virtualWrite(V1, LOW);
   } else {
@@ -138,11 +145,11 @@ void loop()
   //memulai mengirim serta mengolah data dari fungsi yang dibuat tadi
   Blynk.run();
   timer.run();
-  if (GRAM < (1000/6)){
+  if (GRAM < (maxGRAM/6)){
     digitalWrite(23, HIGH);
     digitalWrite(22, LOW);
     digitalWrite(21, LOW);
-  } else if (GRAM > (1000/6) && GRAM < (1000/3)){
+  } else if (GRAM > (maxGRAM/6) && GRAM < (maxGRAM/3)){
     digitalWrite(22, HIGH);
     digitalWrite(21, LOW);
     digitalWrite(23, LOW);
@@ -151,4 +158,9 @@ void loop()
     digitalWrite(22, LOW);
     digitalWrite(21, HIGH);
   }
+
+  Serial.print ("Berat = ");
+  Serial.println (GRAM);
+  Serial.print ("Berat max = ");
+  Serial.println (maxGRAM);
 }
