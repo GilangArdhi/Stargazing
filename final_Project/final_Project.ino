@@ -60,7 +60,6 @@ const int ledMerah = 23;
 const int ledBiru = 2;
 #define btn 19
 int nBtn = 0;
-unsigned long prevMillis = 0;
 
 //deklarasi HX711/sensor berat
 HX711 scale;
