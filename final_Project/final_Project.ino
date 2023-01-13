@@ -53,6 +53,15 @@
 const int DOUT = 18;
 const int CLK = 4;
 
+//dekalarasi button dan led
+const int ledHijau = 21;
+const int ledKuning = 22;
+const int ledMerah = 23;
+const int ledBiru = 2;
+#define btn 19
+int nBtn = 0;
+unsigned long prevMillis = 0;
+
 //deklarasi HX711/sensor berat
 HX711 scale;
 float calibration_factor = 1100.0;
@@ -85,36 +94,36 @@ void myTimerEvent(){
   GRAM = scale.get_units(), 10;
   Blynk.virtualWrite(V0, GRAM);
   delay(100);
-  if (maxGRAM < GRAM){
+
+  
+  //Mengambil berat maximal infus
+  if (nBtn == 0 ){
     maxGRAM = GRAM;
-  } else if (GRAM < 1.0){
-    maxGRAM = 0;
+    digitalWrite(ledBiru, HIGH);
+    delay(250);
+    digitalWrite(ledBiru, LOW);
+    delay(250);
+    digitalWrite(ledBiru, HIGH);
+    delay(250);
+    digitalWrite(ledBiru, LOW);
+    delay(250);
   }
+
+  //kondisi yang digunakan untuk mengatur virtual pin
+  //atau komponen virtual yang ada pada blynk
+  //berdasarkan data yang diterima oleh blynk (GRAM)
   if (GRAM < (maxGRAM/6)){
     Blynk.virtualWrite(V1, HIGH);
     Blynk.virtualWrite(V2, LOW);
+    Blynk.virtualWrite(V3, LOW);
   } else if (GRAM > (maxGRAM/6) && GRAM < (maxGRAM/3)){
     Blynk.virtualWrite(V2, HIGH);
     Blynk.virtualWrite(V1, LOW);
-  } else {
+    Blynk.virtualWrite(V3, LOW);
+  } else if (GRAM > (maxGRAM/3)){
     Blynk.virtualWrite(V2, LOW);
     Blynk.virtualWrite(V1, LOW);
-  }
-}
-
-//fungsi yang digunakan untuk mengatur virtual pin
-//atau komponen virtual yang ada pada blynk
-//berdasarkan data yang diterima oleh blynk (GRAM)
-BLYNK_WRITE(V0){
-  if (param.asFloat() < (1000/6)){
-    Blynk.virtualWrite(V1, HIGH);
-    Blynk.virtualWrite(V2, LOW);
-  } else if (param.asFloat() > (1000/6) && param.asFloat() < (1000/3)){
-    Blynk.virtualWrite(V2, HIGH);
-    Blynk.virtualWrite(V1, LOW);
-  } else {
-    Blynk.virtualWrite(V2, LOW);
-    Blynk.virtualWrite(V1, LOW);
+    Blynk.virtualWrite(V3, HIGH);
   }
 }
 
@@ -123,9 +132,11 @@ BLYNK_WRITE(V0){
 void setup()
 {
   Serial.begin(115200);
-  pinMode(23, OUTPUT);
-  pinMode(22, OUTPUT);
-  pinMode(21, OUTPUT);
+  pinMode(ledMerah, OUTPUT);
+  pinMode(ledKuning, OUTPUT);
+  pinMode(ledHijau, OUTPUT);
+  pinMode(ledBiru, OUTPUT);
+  pinMode(btn, INPUT_PULLUP);
 
   //sensor berat mulai menghitung berat
   scale.begin(DOUT, CLK);
@@ -142,25 +153,31 @@ void setup()
 
 void loop()
 {
+  //Membaca/mengambil nilai btn
+  nBtn = digitalRead(btn);
   //memulai mengirim serta mengolah data dari fungsi yang dibuat tadi
   Blynk.run();
   timer.run();
-  if (GRAM < (maxGRAM/6)){
-    digitalWrite(23, HIGH);
-    digitalWrite(22, LOW);
-    digitalWrite(21, LOW);
+  
+  if (GRAM < (maxGRAM/6) || GRAM < 1.0){
+    digitalWrite(ledMerah, HIGH);
+    digitalWrite(ledKuning, LOW);
+    digitalWrite(ledHijau, LOW);
   } else if (GRAM > (maxGRAM/6) && GRAM < (maxGRAM/3)){
-    digitalWrite(22, HIGH);
-    digitalWrite(21, LOW);
-    digitalWrite(23, LOW);
-  } else {
-    digitalWrite(23, LOW);
-    digitalWrite(22, LOW);
-    digitalWrite(21, HIGH);
+    digitalWrite(ledKuning, HIGH);
+    digitalWrite(ledHijau, LOW);
+    digitalWrite(ledMerah, LOW);
+  } else if (GRAM > (maxGRAM/3)){
+    digitalWrite(ledMerah, LOW);
+    digitalWrite(ledKuning, LOW);
+    digitalWrite(ledHijau, HIGH);
   }
 
+
+  Serial.print ("Nilai Button = ");
+  Serial.println(nBtn);
   Serial.print ("Berat = ");
-  Serial.println (GRAM);
+  Serial.println(GRAM);
   Serial.print ("Berat max = ");
   Serial.println (maxGRAM);
 }
